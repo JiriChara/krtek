@@ -19,8 +19,7 @@
     "browserify-string": "^1.1.1",
     "express": "^4.14.0",
     "hookies": "^2.0.5",
-    "minify": "ianstormtaylor/minify",
-    "uglify-js": "^2.7.3"
+    "minify": "ianstormtaylor/minify"
   },
   "devDependencies": {
     "babel-eslint": "^7.0.0",
