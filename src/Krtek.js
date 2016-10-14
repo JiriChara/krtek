@@ -1,13 +1,13 @@
+import fs from 'fs';
 import { Hooks } from 'hookies';
 import express from 'express';
 import browserify from 'browserify-string';
-import babelify from 'babelify';
 import path from 'path';
-import fs from 'fs';
+import uglify from 'minify';
 
 export default class Krtek extends Hooks {
   constructor({
-    cache = true,
+    cache = false,
     minify = true,
     cacheFolder = '/tmp',
     contentType = 'text/plain',
@@ -29,35 +29,45 @@ export default class Krtek extends Hooks {
   }
 
   configureMiddleware() {
-    this.triggerSync('configure-middleware', this);
+    this.triggerSync('configure-middleware');
 
     this.app.use(express.static(
       path.resolve(__dirname, '..', 'public')
     ));
+
+    this.triggerSync('configure-middleware-done');
   }
 
   configureEndpoints() {
-    this.triggerSync('configure-endpoints', this);
+    this.triggerSync('configure-endpoints');
 
     this.app.get('/bundle', (req, res) => {
-      this.triggerSync('route-bundle', this, req, res);
+      this.triggerSync('route-bundle', req, res);
 
       this.bundle(req, res);
     });
 
     this.app.get('*', (req, res) => {
-      this.triggerSync('route-root', this, req, res);
+      this.triggerSync('route-root', req, res);
 
       res.sendFile(path.resolve(__dirname, '..', 'index.html'));
     });
+
+    this.triggerSync('configure-endpoints-done');
   }
 
   configureJs(req, res) {
-    this.triggerSync('configure-js', this, req, res);
+    this.triggerSync('configure-js', req, res);
+
+    res.writeHead(200, {
+      'Content-Type': this.contentType,
+      'Access-Control-Allow-Origin': this.origin,
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
   }
 
   bundle(req, res) {
-    this.triggerSync('bundle', this, req, res);
+    this.triggerSync('bundle', req, res);
 
     this.configureJs(req, res);
 
@@ -65,6 +75,20 @@ export default class Krtek extends Hooks {
       this.cacheFolder,
       `krtek-${this.generateHash(this.jsCode)}.cache`
     );
+
+    this.off('minify-done');
+    this.on('minify-done', (...args) => {
+      this.triggerSync('bundle-done', ...args);
+
+      if (!this.cache) {
+        this.removeTempFile(file);
+      }
+    });
+
+    if (this.cache && fs.existsSync(file)) {
+      this.readFile(file, req, res);
+      return;
+    }
 
     const bundleFs = fs.createWriteStream(file);
 
@@ -75,14 +99,37 @@ export default class Krtek extends Hooks {
       .bundle().pipe(bundleFs);
 
     bundleFs.on('finish', () => {
-      fs.readFile(file, 'utf-8', (err, data) => {
-        res.writeHead(200, {
-          'Content-Type': this.contentType,
-          'Access-Control-Allow-Origin': this.origin,
-          'Access-Control-Allow-Headers': 'Content-Type'
-        });
-        this.triggerSync('bundle-complete', this, req, res, err, data);
+      this.readFile(file, req, res);
+    });
+  }
+
+  minifyFile(file, req, res) {
+    this.triggerSync('minify');
+
+    fs.readFile(file, 'utf-8', (err, data) => {
+      const result = uglify.js(data);
+
+      fs.writeFile(file, result, (writeErr) => {
+        if (writeErr) {
+          return this.triggerSync('minify-error', writeErr);
+        }
+
+        return this.triggerSync('minify-done', req, res, result);
       });
+    });
+  }
+
+  readFile(file, req, res) {
+    fs.readFile(file, 'utf-8', () => {
+      this.minifyFile(file, req, res);
+    });
+  }
+
+  removeTempFile(file) {
+    this.triggerSync('remove-temp-file', file);
+
+    fs.unlink(file, () => {
+      this.triggerSync('remove-temp-file-done');
     });
   }
 
@@ -110,13 +157,13 @@ export default class Krtek extends Hooks {
   }
 
   start() {
-    this.triggerSync('start', this);
+    this.triggerSync('start');
 
     this.configureMiddleware();
     this.configureEndpoints();
 
     this.app.listen(this.port, this.host, () => {
-      this.triggerSync('started', this);
+      this.triggerSync('started');
     });
   }
 }
