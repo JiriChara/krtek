@@ -1,6 +1,6 @@
 # krtek
 
-JavaScript on demand
+Krtek is a simple node server that allows you to bundle and minify JavaScript on the fly.
 
 ![Krtek](https://raw.github.com/JiriChara/krtek/master/public/images/krtek.jpg)
 
@@ -9,13 +9,21 @@ JavaScript on demand
 ```javascript
 import Krtek from 'krtek';
 
-const krtek = new Krtek();
+const krtek = new Krtek({
+  cache: true,
+  minify: true,
+  cacheFolder: '/tmp',
+  contentType: 'text/plain',
+  origin: 'localhost',
+  host: 'localhost',
+  port: 3000
+});
 
-krtek.on('started', () => {
+krtek.on('start', () => {
   console.log(`Krtek is running on ${krtek.host}:${krtek.port}`);
 });
 
-krtek.on('configure-js', (req) => {
+krtek.on('configure', (req) => {
   krtek.jsCode = `
     import React from 'react';
     import { render } from 'react-dom';
@@ -26,7 +34,7 @@ krtek.on('configure-js', (req) => {
   `;
 });
 
-krtek.on('bundle-complete', (k, req, res, err, data) => {
+krtek.on('done', (k, req, res, err, data) => {
   res.write(data);
   res.end();
 });

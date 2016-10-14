@@ -7,7 +7,7 @@ import uglify from 'minify';
 
 export default class Krtek extends Hooks {
   constructor({
-    cache = false,
+    cache = true,
     minify = true,
     cacheFolder = '/tmp',
     contentType = 'text/plain',
@@ -67,8 +67,6 @@ export default class Krtek extends Hooks {
   }
 
   bundle(req, res) {
-    this.triggerSync('bundle', req, res);
-
     this.configureJs(req, res);
 
     const file = path.resolve(
@@ -78,7 +76,7 @@ export default class Krtek extends Hooks {
 
     this.off('minify-done');
     this.on('minify-done', (...args) => {
-      this.triggerSync('bundle-done', ...args);
+      this.triggerSync('done', ...args);
 
       if (!this.cache) {
         this.removeTempFile(file);
@@ -86,7 +84,7 @@ export default class Krtek extends Hooks {
     });
 
     if (this.cache && fs.existsSync(file)) {
-      this.readFile(file, req, res);
+      this.readFile(file, req, res, false);
       return;
     }
 
@@ -99,30 +97,33 @@ export default class Krtek extends Hooks {
       .bundle().pipe(bundleFs);
 
     bundleFs.on('finish', () => {
-      this.readFile(file, req, res);
+      this.readFile(file, req, res, this.minify);
     });
   }
 
-  minifyFile(file, req, res) {
-    this.triggerSync('minify');
-
+  minifyFile(file, req, res, minify) {
     fs.readFile(file, 'utf-8', (err, data) => {
-      const result = uglify.js(data);
+      if (minify) {
+        const result = uglify.js(data);
 
-      fs.writeFile(file, result, (writeErr) => {
-        if (writeErr) {
-          return this.triggerSync('minify-error', writeErr);
-        }
+        fs.writeFile(file, result, (writeErr) => {
+          // TODO: handle errors in better way
+          if (writeErr) {
+            this.triggerSync('minify-error', writeErr);
+            return;
+          }
 
-        return this.triggerSync('minify-done', req, res, result);
-      });
+          this.triggerSync('minify-done', req, res, result);
+        });
+        return;
+      }
+
+      this.triggerSync('minify-done', req, res, data);
     });
   }
 
-  readFile(file, req, res) {
-    fs.readFile(file, 'utf-8', () => {
-      this.minifyFile(file, req, res);
-    });
+  readFile(file, req, res, minify) {
+    this.minifyFile(file, req, res, minify);
   }
 
   removeTempFile(file) {
@@ -157,13 +158,11 @@ export default class Krtek extends Hooks {
   }
 
   start() {
-    this.triggerSync('start');
-
     this.configureMiddleware();
     this.configureEndpoints();
 
     this.app.listen(this.port, this.host, () => {
-      this.triggerSync('started');
+      this.triggerSync('start');
     });
   }
 }
