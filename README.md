@@ -7,7 +7,7 @@ JavaScript on demand
 ## Usage
 
 ```javascript
-import Krtek from './src/Krtek';
+import Krtek from 'krtek';
 
 const krtek = new Krtek();
 
