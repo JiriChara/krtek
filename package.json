@@ -1,7 +1,7 @@
 {
   "name": "krtek",
   "version": "1.0.0",
-  "main": "lib/Krtek.js",
+  "main": "lib/index.js",
   "author": "Jiri Chara <jiri@chara.vip>",
   "license": "MIT",
   "scripts": {
@@ -17,6 +17,7 @@
     "babel-cli": "^6.16.0",
     "babel-plugin-transform-class-properties": "^6.16.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-polyfill": "^6.16.0",
     "babel-preset-es2015": "^6.16.0",
     "babel-preset-react": "^6.16.0",
     "babelify": "^7.3.0",
@@ -24,7 +25,8 @@
     "browserify-string": "^1.1.1",
     "express": "^4.14.0",
     "hookies": "^2.0.5",
-    "minify": "ianstormtaylor/minify"
+    "minify": "ianstormtaylor/minify",
+    "uglify-js": "^2.7.3"
   },
   "devDependencies": {
     "ava": "^0.16.0",
@@ -38,11 +40,12 @@
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.4.1",
     "nyc": "^8.3.1",
-    "rimraf": "^2.5.4"
+    "rimraf": "^2.5.4",
+    "sinon": "^1.17.6"
   },
   "ava": {
     "files": [
-      "spec/*.spec.js"
+      "spec/**/*.spec.js"
     ],
     "source": [
       "src/*.js"
