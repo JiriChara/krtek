@@ -40,7 +40,10 @@ test.cb('returns an error if caching fails', (t) => {
     t.context.hash,
     t.context.string,
     (error) => {
-      t.true(/ENOENT: no such file or directory/.test(error.message));
+      t.regex(
+        error.message,
+        /ENOENT: no such file or directory/
+      );
       t.end();
     }
   );

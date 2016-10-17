@@ -101,8 +101,9 @@ test('generates cacheHash', (t) => {
 });
 
 test('generates numeric cacheHash', (t) => {
-  t.true(
-    /^-?\d+$/.test(t.context.cache.cacheHash)
+  t.regex(
+    t.context.cache.cacheHash,
+    /^-?\d+$/
   );
 });
 
@@ -114,6 +115,9 @@ test('generates unique cacheHash', (t) => {
     }
   });
 
-  t.true(/^-?\d+$/.test(cache.cacheHash));
+  t.regex(
+    cache.cacheHash,
+    /^-?\d+$/
+  );
   t.not(cache.cacheHash, t.context.cache.cacheHash);
 });

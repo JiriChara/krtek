@@ -40,7 +40,10 @@ test.cb('returns an error if reading fails', (t) => {
   provider.get(
     t.context.hash,
     (err) => {
-      t.true(/ENOENT: no such file or directory/.test(err));
+      t.regex(
+        err,
+        /ENOENT: no such file or directory/
+      );
       t.end();
     }
   );

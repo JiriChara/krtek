@@ -41,6 +41,13 @@ test('inits host process.env.HOST', (t) => {
   );
 });
 
+test('inits host to given one', (t) => {
+  t.is(
+    new Krtek({ host: 'foo' }).host,
+    'foo'
+  );
+});
+
 test('inits port', (t) => {
   t.is(
     t.context.krtekInstance.port,
@@ -48,10 +55,87 @@ test('inits port', (t) => {
   );
 });
 
-test('inits host process.env.HOST', (t) => {
+test('inits port process.env.PORT', (t) => {
   process.env.PORT = 4000;
   t.is(
     new Krtek().port,
     '4000'
+  );
+});
+
+test('inits port to given one', (t) => {
+  t.is(
+    new Krtek({ port: 1234 }).port,
+    1234
+  );
+});
+
+test('inits cacheFolder', (t) => {
+  t.is(
+    t.context.krtekInstance.cacheFolder,
+    '/tmp'
+  );
+});
+
+test('inits cacheFolder to given one', (t) => {
+  t.is(
+    new Krtek({ cacheFolder: '/foo' }).cacheFolder,
+    '/foo'
+  );
+});
+
+test('inits contentType', (t) => {
+  t.is(
+    t.context.krtekInstance.contentType,
+    'application/javascript'
+  );
+});
+
+test('inits contentType to given one', (t) => {
+  t.is(
+    new Krtek({ contentType: 'application/whatever' }).contentType,
+    'application/whatever'
+  );
+});
+
+test('inits origin', (t) => {
+  t.is(
+    t.context.krtekInstance.origin,
+    'localhost'
+  );
+});
+
+test('inits origin to given one', (t) => {
+  t.is(
+    new Krtek({ origin: 'myserver.com' }).origin,
+    'myserver.com'
+  );
+});
+
+test('inits cache', (t) => {
+  t.is(
+    t.context.krtekInstance.cache,
+    true
+  );
+});
+
+test('inits cache to given one', (t) => {
+  t.is(
+    new Krtek({ cache: false }).cache,
+    false
+  );
+});
+
+test('inits minify', (t) => {
+  t.is(
+    t.context.krtekInstance.minify,
+    true
+  );
+});
+
+test('inits minify to given one', (t) => {
+  t.is(
+    new Krtek({ minify: false }).minify,
+    false
   );
 });
