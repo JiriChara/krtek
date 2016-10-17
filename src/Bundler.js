@@ -19,7 +19,7 @@ export default class Bundler {
     return Math.random().toString(36).slice(2);
   }
 
-  bundle(jsString, callback) {
+  bundle(jsString) {
     const file = path.resolve(
       this.folder,
       `krtek-${this.generateRandomHash()}.bundle`
@@ -27,19 +27,21 @@ export default class Bundler {
 
     const bundleFs = fs.createWriteStream(file);
 
-    browserify(jsString)
-      .transform('babelify', this.babelOptions)
-      .bundle()
-      .pipe(bundleFs);
+    return new Promise((resolve, reject) => {
+      browserify(jsString)
+        .transform('babelify', this.babelOptions)
+        .bundle()
+        .pipe(bundleFs);
 
-    bundleFs.on('finish', () => {
-      bundleFs.end();
-      readFile(file, callback);
-    });
+      bundleFs.on('finish', () => {
+        bundleFs.end();
+        return readFile(file).then(resolve, reject);
+      });
 
-    bundleFs.on('error', (err) => {
-      bundleFs.end();
-      callback(err);
+      bundleFs.on('error', (err) => {
+        bundleFs.end();
+        return reject(err);
+      });
     });
   }
 }

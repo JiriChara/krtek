@@ -9,16 +9,14 @@ test.beforeEach((t) => {
 });
 
 test.cb('returns bundled javascript', (t) => {
-  t.pass(2);
+  t.pass(1);
 
   t.context.bundlerInstance.bundle(
-    'console.log(\'foo\');',
-    (err, result) => {
-      t.not(err);
-      t.regex(result, /console\.log\('foo'\)/);
-      t.end();
-    }
-  );
+    'console.log(\'foo\');'
+  ).then((result) => {
+    t.regex(result, /console\.log\('foo'\)/);
+    t.end();
+  });
 });
 
 test.cb('returns error if bundle fails', (t) => {
@@ -29,13 +27,12 @@ test.cb('returns error if bundle fails', (t) => {
   });
 
   bundler.bundle(
-    'console.log(\'foo\');',
-    (err) => {
-      t.regex(
-        err.message,
-        /ENOENT: no such file or directory/
-      );
-      t.end();
-    }
-  );
+    'console.log(\'foo\');'
+  ).catch((err) => {
+    t.regex(
+      err.message,
+      /ENOENT: no such file or directory/
+    );
+    t.end();
+  });
 });
