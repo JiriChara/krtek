@@ -52,7 +52,6 @@ export default class Cache {
    * Set cache.
    */
   set(callback) {
-    // TODO: handle errors
     return this.provider.set(
       this.cacheHash,
       this.string,
@@ -64,7 +63,6 @@ export default class Cache {
    * Get cache.
    */
   get(callback) {
-    // TODO: handle errors
     return this.provider.get(
       this.cacheHash,
       callback
