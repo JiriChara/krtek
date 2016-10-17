@@ -14,7 +14,7 @@ test.beforeEach((t) => {
 });
 
 test.cb('retrieves file from cache', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   t.context.cache.set().then(() => {
     t.context.cache.get().then((string) => {
@@ -25,7 +25,7 @@ test.cb('retrieves file from cache', (t) => {
 });
 
 test.cb('returns an error if caching provider fails', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   const cache = new Cache({
     string: t.context.string,
@@ -44,7 +44,7 @@ test.cb('returns an error if caching provider fails', (t) => {
 });
 
 test.cb('returns an error if retrieving fails', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   const cache = new Cache({
     string: t.context.string,

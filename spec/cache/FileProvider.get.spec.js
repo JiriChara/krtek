@@ -14,7 +14,7 @@ test.beforeEach((t) => {
 });
 
 test.cb('gets content of the cached file', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   t.context.fileProviderInstance.set(
     t.context.hash,
@@ -30,7 +30,7 @@ test.cb('gets content of the cached file', (t) => {
 });
 
 test.cb('returns an error if reading fails', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   const provider = new FileProvider({
     folder: '/some/folder/that/doesnt/exist'

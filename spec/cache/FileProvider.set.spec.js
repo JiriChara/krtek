@@ -15,7 +15,7 @@ test.beforeEach((t) => {
 });
 
 test.cb('caches string in a file', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   t.context.fileProviderInstance.set(
     t.context.hash,
@@ -29,7 +29,7 @@ test.cb('caches string in a file', (t) => {
 });
 
 test.cb('returns an error if caching fails', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   const provider = new FileProvider({
     folder: '/some/folder/that/doesnt/exist'

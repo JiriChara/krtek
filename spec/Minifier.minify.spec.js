@@ -9,29 +9,24 @@ test.beforeEach((t) => {
   t.context.jsString = 'var foo = 1 + 1;';
 });
 
-test.cb('minifies given JavaScript string', (t) => {
-  t.pass(2);
+test('minifies given JavaScript string', async (t) => {
+  t.plan(1);
 
-  t.context.minifierInstance.minify(t.context.jsString, (err, result) => {
-    t.not(err);
-    t.is(
-      result,
-      'var foo=2;'
-    );
-    t.end();
-  });
+  const res = await t.context.minifierInstance.minify(t.context.jsString);
+  t.is(res, 'var foo=2;');
 });
 
 test.cb('returns en error if JavaScript string is not valid', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   const invalidCode = 'invalid javascript code; var function function.';
 
-  t.context.minifierInstance.minify(invalidCode, (err) => {
-    t.regex(
-      err,
-      /SyntaxError/
-    );
-    t.end();
-  });
+  t.context.minifierInstance.minify(invalidCode)
+    .catch((err) => {
+      t.regex(
+        err.message,
+        /SyntaxError/
+      );
+      t.end();
+    });
 });

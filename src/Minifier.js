@@ -5,17 +5,16 @@ export default class Minifier {
     this.options = options;
   }
 
-  minify(jsString, callback) {
+  minify(jsString) {
     try {
-      callback(
-        null,
+      return Promise.resolve(
         uglify.minify(
           jsString,
           this.options
         ).code
       );
     } catch (e) {
-      callback(e.message);
+      return Promise.reject(e);
     }
   }
 }
