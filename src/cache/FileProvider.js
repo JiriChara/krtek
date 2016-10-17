@@ -28,22 +28,18 @@ export default class FileProvider {
   /**
    * Cache given string in a file and call callback function when done.
    */
-  set(hash, string, callback) {
+  set(hash, string) {
     const file = this.getFilePath(hash);
 
-    writeFile(file, string, (err) => {
-      callback(err);
-    });
+    return writeFile(file, string);
   }
 
   /**
    * Read content of the cached file.
    */
-  get(hash, callback) {
+  get(hash) {
     const file = this.getFilePath(hash);
 
-    readFile(file, (err, content) => {
-      callback(err, content);
-    });
+    return readFile(file);
   }
 }

@@ -19,14 +19,13 @@ test.cb('caches string in a file', (t) => {
 
   t.context.fileProviderInstance.set(
     t.context.hash,
-    t.context.string,
-    () => {
-      fs.readFile(t.context.filePath, 'utf-8', (err, content) => {
-        t.is(content, t.context.string);
-        t.end();
-      });
-    }
-  );
+    t.context.string
+  ).then(() => {
+    fs.readFile(t.context.filePath, 'utf-8', (err, content) => {
+      t.is(content, t.context.string);
+      t.end();
+    });
+  });
 });
 
 test.cb('returns an error if caching fails', (t) => {
@@ -38,13 +37,12 @@ test.cb('returns an error if caching fails', (t) => {
 
   provider.set(
     t.context.hash,
-    t.context.string,
-    (error) => {
-      t.regex(
-        error.message,
-        /ENOENT: no such file or directory/
-      );
-      t.end();
-    }
-  );
+    t.context.string
+  ).catch((error) => {
+    t.regex(
+      error.message,
+      /ENOENT: no such file or directory/
+    );
+    t.end();
+  });
 });

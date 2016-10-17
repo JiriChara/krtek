@@ -18,16 +18,15 @@ test.cb('gets content of the cached file', (t) => {
 
   t.context.fileProviderInstance.set(
     t.context.hash,
-    t.context.string,
-    () => {
-      t.context.fileProviderInstance.get(
-        t.context.hash, (err, content) => {
-          t.is(content, t.context.string);
-          t.end();
-        }
-      );
-    }
-  );
+    t.context.string
+  ).then(() => {
+    t.context.fileProviderInstance.get(
+      t.context.hash
+    ).then((content) => {
+      t.is(content, t.context.string);
+      t.end();
+    });
+  });
 });
 
 test.cb('returns an error if reading fails', (t) => {
@@ -38,13 +37,12 @@ test.cb('returns an error if reading fails', (t) => {
   });
 
   provider.get(
-    t.context.hash,
-    (err) => {
-      t.regex(
-        err,
-        /ENOENT: no such file or directory/
-      );
-      t.end();
-    }
-  );
+    t.context.hash
+  ).catch((err) => {
+    t.regex(
+      err,
+      /ENOENT: no such file or directory/
+    );
+    t.end();
+  });
 });
