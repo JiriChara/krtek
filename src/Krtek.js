@@ -26,7 +26,7 @@ export default class Krtek extends Hooks {
     },
     createIndexRoute = true,
     cacheOptions = {
-      provider: FileProvider
+      provider: new FileProvider()
     },
     minifier = new Minifier(),
     bundler = new Bundler()
@@ -56,8 +56,6 @@ export default class Krtek extends Hooks {
     if (!this.createIndexRoute) return;
 
     this.app.get('/', (req, res) => {
-      this.triggerSync('route-root', req, res);
-
       res.sendFile(path.resolve(__dirname, '..', 'index.html'));
     });
 
@@ -72,31 +70,6 @@ export default class Krtek extends Hooks {
         string
       })
     );
-  }
-
-  bundle(req, res) {
-    this.triggerSync('bundle', req, res);
-
-    const code = this.getJsCode();
-    let cacheProvider = null;
-
-    if (!code) {
-      throw new NoJSCodeGivenError(
-        'Nothing to bundle - no JavaScript code given.'
-      );
-    }
-
-    if (this.cacheOptions) {
-      cacheProvider = this.createCacheProvider(code);
-
-      return cacheProvider.get(code)
-        .catch(() => this.handleBundle(code)
-          .then(this.handleMinify)
-          .then(this.handleCache)
-        );
-    }
-
-    return this.handleBundle(code).then(this.handleMinify);
   }
 
   handleCache(code) {
@@ -125,6 +98,31 @@ export default class Krtek extends Hooks {
       .catch((err) => {
         throw new MinifyError(err);
       });
+  }
+
+  bundle(req, res) {
+    this.triggerSync('bundle', req, res);
+
+    const code = this.getJsCode();
+    let cacheProvider = null;
+
+    if (!code) {
+      throw new NoJSCodeGivenError(
+        'Nothing to bundle - no JavaScript code given.'
+      );
+    }
+
+    if (this.cacheOptions) {
+      cacheProvider = this.createCacheProvider(code);
+
+      return cacheProvider.get(code)
+        .catch(() => this.handleBundle(code)
+          .then(this.handleMinify)
+          .then(this.handleCache)
+        );
+    }
+
+    return this.handleBundle(code).then(this.handleMinify);
   }
 
   triggerSync(name, ...args) {
