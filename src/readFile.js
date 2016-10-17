@@ -1,5 +1,10 @@
 import fs from 'fs';
 
-const readFile = (file, callback) => fs.readFile(file, 'utf-8', callback);
+const readFile = file => new Promise((resolve, reject) => {
+  fs.readFile(file, 'utf-8', (err, content) => {
+    if (err) return reject(err);
+    return resolve(content);
+  });
+});
 
 export default readFile;
