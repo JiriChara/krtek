@@ -5,6 +5,9 @@ import express from 'express';
 import sinon from 'sinon';
 
 import Krtek from '../src/Krtek';
+import Minifier from '../src/Minifier';
+import Bundler from '../src/Bundler';
+import FileProvider from '../src/cache/FileProvider';
 
 test.beforeEach((t) => {
   t.context.krtekInstance = new Krtek();
@@ -87,5 +90,61 @@ test('inits headers to given one', (t) => {
   t.deepEqual(
     new Krtek({ headers: { foo: 1 } }).headers,
     { foo: 1 }
+  );
+});
+
+test('inits createIndexRoute', (t) => {
+  t.true(t.context.krtekInstance.createIndexRoute);
+});
+
+test('inits createIndexRoute to given one', (t) => {
+  t.false(
+    new Krtek({ createIndexRoute: false }).createIndexRoute
+  );
+});
+
+test('inits cacheOptions', (t) => {
+  t.deepEqual(
+    t.context.krtekInstance.cacheOptions,
+    {
+      provider: FileProvider
+    }
+  );
+});
+
+test('inits cacheOptions to given one', (t) => {
+  t.deepEqual(
+    new Krtek({ cacheOptions: { foo: 1 } }).cacheOptions,
+    { foo: 1 }
+  );
+});
+
+test('inits minifier', (t) => {
+  t.true(
+    t.context.krtekInstance.minifier instanceof Minifier
+  );
+});
+
+test('inits minifier to given one', (t) => {
+  const minifier = sinon.spy();
+
+  t.deepEqual(
+    new Krtek({ minifier }).minifier,
+    minifier
+  );
+});
+
+test('inits bundler', (t) => {
+  t.true(
+    t.context.krtekInstance.bundler instanceof Bundler
+  );
+});
+
+test('inits bundler to given one', (t) => {
+  const bundler = sinon.spy();
+
+  t.deepEqual(
+    new Krtek({ bundler }).bundler,
+    bundler
   );
 });

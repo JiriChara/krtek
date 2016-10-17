@@ -16,20 +16,20 @@ import {
 
 export default class Krtek extends Hooks {
   constructor({
-    cacheOptions = {
-      provider: FileProvider
-    },
-    minifier = new Minifier(),
-    bundler = new Bundler(),
-    createIndexRoute = true,
+    app = express(),
+    host = process.env.HOST || 'localhost',
+    port = process.env.PORT || 3000,
     headers = {
       'Content-Type': 'application/javascript',
       'Access-Control-Allow-Origin': 'localhost',
       'Access-Control-Allow-Headers': 'Content-Type'
     },
-    host = process.env.HOST || 'localhost',
-    port = process.env.PORT || 3000,
-    app = express()
+    createIndexRoute = true,
+    cacheOptions = {
+      provider: FileProvider
+    },
+    minifier = new Minifier(),
+    bundler = new Bundler()
   } = {}) {
     super();
 
@@ -38,7 +38,6 @@ export default class Krtek extends Hooks {
     this.port = port;
     this.headers = headers;
     this.createIndexRoute = createIndexRoute;
-
     this.cacheOptions = cacheOptions;
     this.minifier = minifier;
     this.bundler = bundler;
