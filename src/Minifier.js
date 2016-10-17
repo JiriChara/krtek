@@ -5,10 +5,17 @@ export default class Minifier {
     this.options = options;
   }
 
-  minify(jsString) {
-    return uglify.minify(
-      jsString,
-      this.options
-    ).code;
+  minify(jsString, callback) {
+    try {
+      callback(
+        null,
+        uglify.minify(
+          jsString,
+          this.options
+        ).code
+      );
+    } catch (e) {
+      callback(e.message);
+    }
   }
 }
