@@ -8,19 +8,18 @@ test.beforeEach((t) => {
   t.context.bundlerInstance = new Bundler();
 });
 
-test.cb('returns bundled javascript', (t) => {
-  t.pass(1);
+test('returns bundled javascript', async (t) => {
+  t.plan(1);
 
-  t.context.bundlerInstance.bundle(
+  const res = await t.context.bundlerInstance.bundle(
     'console.log(\'foo\');'
-  ).then((result) => {
-    t.regex(result, /console\.log\('foo'\)/);
-    t.end();
-  });
+  );
+
+  t.regex(res, /console\.log\('foo'\)/);
 });
 
 test.cb('returns error if bundle fails', (t) => {
-  t.pass(1);
+  t.plan(1);
 
   const bundler = new Bundler({
     folder: '/some/nonexisting/folder/'
