@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/JiriChara/krtek.svg?branch=master)](https://travis-ci.org/JiriChara/krtek)
+
 # krtek
 
 Krtek is a simple node server that allows you to bundle and minify JavaScript on the fly.
