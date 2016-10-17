@@ -107,7 +107,7 @@ test('inits cacheOptions', (t) => {
   t.deepEqual(
     t.context.krtekInstance.cacheOptions,
     {
-      provider: FileProvider
+      provider: new FileProvider()
     }
   );
 });
