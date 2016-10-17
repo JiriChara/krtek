@@ -2,7 +2,7 @@
 /* eslint no-param-reassign:0 */
 import test from 'ava';
 import express from 'express';
-import browserify from 'browserify-string';
+import sinon from 'sinon';
 
 import Krtek from '../src/Krtek';
 
@@ -19,10 +19,12 @@ test('initializes express app', (t) => {
   );
 });
 
-test('initializes browserify', (t) => {
+test('initializes express app to given one', (t) => {
+  const app = sinon.spy();
+
   t.is(
-    t.context.krtekInstance.browserify,
-    browserify
+    new Krtek({ app }).app,
+    app
   );
 });
 
@@ -70,72 +72,20 @@ test('inits port to given one', (t) => {
   );
 });
 
-test('inits cacheFolder', (t) => {
-  t.is(
-    t.context.krtekInstance.cacheFolder,
-    '/tmp'
+test('inits headers', (t) => {
+  t.deepEqual(
+    t.context.krtekInstance.headers,
+    {
+      'Content-Type': 'application/javascript',
+      'Access-Control-Allow-Origin': 'localhost',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
   );
 });
 
-test('inits cacheFolder to given one', (t) => {
-  t.is(
-    new Krtek({ cacheFolder: '/foo' }).cacheFolder,
-    '/foo'
-  );
-});
-
-test('inits contentType', (t) => {
-  t.is(
-    t.context.krtekInstance.contentType,
-    'application/javascript'
-  );
-});
-
-test('inits contentType to given one', (t) => {
-  t.is(
-    new Krtek({ contentType: 'application/whatever' }).contentType,
-    'application/whatever'
-  );
-});
-
-test('inits origin', (t) => {
-  t.is(
-    t.context.krtekInstance.origin,
-    'localhost'
-  );
-});
-
-test('inits origin to given one', (t) => {
-  t.is(
-    new Krtek({ origin: 'myserver.com' }).origin,
-    'myserver.com'
-  );
-});
-
-test('inits cache', (t) => {
-  t.is(
-    t.context.krtekInstance.cache,
-    true
-  );
-});
-
-test('inits cache to given one', (t) => {
-  t.is(
-    new Krtek({ cache: false }).cache,
-    false
-  );
-});
-
-test('inits minify', (t) => {
-  t.is(
-    t.context.krtekInstance.minify,
-    true
-  );
-});
-
-test('inits minify to given one', (t) => {
-  t.is(
-    new Krtek({ minify: false }).minify,
-    false
+test('inits headers to given one', (t) => {
+  t.deepEqual(
+    new Krtek({ headers: { foo: 1 } }).headers,
+    { foo: 1 }
   );
 });

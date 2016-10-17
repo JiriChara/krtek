@@ -49,53 +49,11 @@ test('initializes string to given one', (t) => {
   );
 });
 
-test('initializes krtekOptions', (t) => {
-  t.deepEqual(
-    t.context.cache.krtekOptions,
-    {}
-  );
-});
-
-test('initializes krtekOptions to given one', (t) => {
-  const krtekOptions = sinon.spy();
-
-  const cache = new Cache({
-    string: t.context.string,
-    krtekOptions
-  });
-
-  t.is(
-    cache.krtekOptions,
-    krtekOptions
-  );
-});
-
-test('creates a cacheString', (t) => {
-  t.is(
-    t.context.cache.cacheString,
-    '{}Somestring'
-  );
-});
-
-test('creates a cacheString based on params', (t) => {
-  const cache = new Cache({
-    string: 'foo',
-    krtekOptions: {
-      foo: 1
-    }
-  });
-
-  t.is(
-    cache.cacheString,
-    '{"foo":1}foo'
-  );
-});
-
 test('generates cacheHash', (t) => {
   t.is(
     t.context.cache.cacheHash,
     t.context.cache.generateHash(
-      t.context.cache.cacheString
+      t.context.cache.string
     )
   );
 });
@@ -109,10 +67,7 @@ test('generates numeric cacheHash', (t) => {
 
 test('generates unique cacheHash', (t) => {
   const cache = new Cache({
-    string: 'foo',
-    krtekOptions: {
-      foo: 1
-    }
+    string: 'foo'
   });
 
   t.regex(

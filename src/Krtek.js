@@ -1,129 +1,131 @@
-import fs from 'fs';
 import { Hooks } from 'hookies';
 import express from 'express';
-import browserify from 'browserify-string';
 import path from 'path';
-import uglify from 'minify';
+
+import Minifier from './Minifier';
+import Bundler from './Bundler';
+import Cache from './Cache';
+import FileProvider from './cache/FileProvider';
+
+import {
+  BundleError,
+  CacheError,
+  NoJSCodeGivenError,
+  MinifyError
+} from './errors';
 
 export default class Krtek extends Hooks {
   constructor({
-    cache = true,
-    minify = true,
-    cacheFolder = '/tmp',
-    contentType = 'application/javascript',
-    origin = 'localhost',
+    cacheOptions = {
+      provider: FileProvider
+    },
+    minifier = new Minifier(),
+    bundler = new Bundler(),
+    createIndexRoute = true,
+    headers = {
+      'Content-Type': 'application/javascript',
+      'Access-Control-Allow-Origin': 'localhost',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    },
     host = process.env.HOST || 'localhost',
-    port = process.env.PORT || 3000
+    port = process.env.PORT || 3000,
+    app = express()
   } = {}) {
     super();
 
-    this.app = express();
-    this.browserify = browserify;
+    this.app = app;
     this.host = host;
     this.port = port;
-    this.cacheFolder = cacheFolder;
-    this.contentType = contentType;
-    this.origin = origin;
-    this.cache = cache;
-    this.minify = minify;
+    this.headers = headers;
+    this.createIndexRoute = createIndexRoute;
+
+    this.cacheOptions = cacheOptions;
+    this.minifier = minifier;
+    this.bundler = bundler;
+  }
+
+  setJsCode(string) {
+    this.jsCode = string;
+    return string;
+  }
+
+  getJsCode() {
+    return this.jsCode;
   }
 
   configureMiddleware() {
-    this.app.use(express.static(
-      path.resolve(__dirname, '..', 'public')
-    ));
+    if (!this.createIndexRoute) return;
 
-    this.app.get('/bundle', (req, res) => {
-      this.triggerSync('route-bundle', req, res);
-
-      this.bundle(req, res);
-    });
-
-    this.trigger('configure-middleware');
-
-    this.app.get('*', (req, res) => {
+    this.app.get('/', (req, res) => {
       this.triggerSync('route-root', req, res);
 
       res.sendFile(path.resolve(__dirname, '..', 'index.html'));
     });
+
+    this.app.use(express.static(
+      path.resolve(__dirname, '..', 'public')
+    ));
   }
 
-  configureJs(req, res) {
-    this.triggerSync('configure-js', req, res);
-
-    res.writeHead(200, {
-      'Content-Type': this.contentType,
-      'Access-Control-Allow-Origin': this.origin,
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
+  createCacheProvider(string) {
+    return new Cache(
+      Object.assign({}, this.cacheOptions, {
+        string
+      })
+    );
   }
 
   bundle(req, res) {
-    this.configureJs(req, res);
+    this.triggerSync('bundle', req, res);
 
-    const file = path.resolve(
-      this.cacheFolder,
-      `krtek-${this.generateHash(this.jsCode)}.cache`
-    );
+    const code = this.getJsCode();
+    let cacheProvider = null;
 
-    this.off('minify-done');
-    this.on('minify-done', (...args) => {
-      this.triggerSync('done', ...args);
-
-      if (!this.cache) {
-        this.removeTempFile(file);
-      }
-    });
-
-    if (this.cache && fs.existsSync(file)) {
-      this.readFile(file, req, res, false);
-      return;
+    if (!code) {
+      throw new NoJSCodeGivenError(
+        'Nothing to bundle - no JavaScript code given.'
+      );
     }
 
-    const bundleFs = fs.createWriteStream(file);
+    if (this.cacheOptions) {
+      cacheProvider = this.createCacheProvider(code);
 
-    browserify(this.jsCode)
-      .transform('babelify', {
-        presets: ['es2015', 'react']
-      })
-      .bundle().pipe(bundleFs);
+      return cacheProvider.get(code)
+        .catch(() => this.handleBundle(code)
+          .then(this.handleMinify)
+          .then(this.handleCache)
+        );
+    }
 
-    bundleFs.on('finish', () => {
-      this.readFile(file, req, res, this.minify);
-    });
+    return this.handleBundle(code).then(this.handleMinify);
   }
 
-  minifyFile(file, req, res, minify) {
-    fs.readFile(file, 'utf-8', (err, data) => {
-      if (minify) {
-        const result = uglify.js(data);
+  handleCache(code) {
+    const cacheProvider = this.createCacheProvider(code);
 
-        fs.writeFile(file, result, (writeErr) => {
-          // TODO: handle errors in better way
-          if (writeErr) {
-            this.triggerSync('minify-error', writeErr);
-            return;
-          }
-
-          this.triggerSync('minify-done', req, res, result);
-        });
-        return;
-      }
-
-      this.triggerSync('minify-done', req, res, data);
-    });
+    return cacheProvider.set(code)
+      .then(() => cacheProvider.get(code))
+      .catch((err) => {
+        throw new CacheError(err);
+      });
   }
 
-  readFile(file, req, res, minify) {
-    this.minifyFile(file, req, res, minify);
+  handleBundle(code) {
+    if (!this.bundler) return Promise.resolve(code);
+
+    return this.bundler.bundle(code)
+      .catch((err) => {
+        throw new BundleError(err);
+      });
   }
 
-  removeTempFile(file) {
-    this.triggerSync('remove-temp-file', file);
+  handleMinify(code) {
+    if (!this.minifier) return Promise.resolve(code);
 
-    fs.unlink(file, () => {
-      this.triggerSync('remove-temp-file-done');
-    });
+    return this.minifier.minify(code)
+      .catch((err) => {
+        throw new MinifyError(err);
+      });
   }
 
   triggerSync(name, ...args) {
@@ -132,21 +134,6 @@ export default class Krtek extends Hooks {
       sync: true,
       context: this
     }, ...args);
-  }
-
-  generateHash(string) {
-    let hash = 0;
-    let i;
-    let chr;
-    let len;
-
-    if (string === 0) return hash;
-    for (i = 0, len = string.length; i < len; i++) {
-      chr = string.charCodeAt(i);
-      hash = ((hash << 5) - hash) + chr;
-      hash |= 0;
-    }
-    return hash;
   }
 
   start() {

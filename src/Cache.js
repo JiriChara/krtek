@@ -1,5 +1,5 @@
 import { FileProvider } from './cache';
-import { CacheStringMissingError } from './errors';
+import { CacheError } from './errors';
 
 /**
  * Cache service is responsible for caching. It uses FileProvider as a cache provider by default.
@@ -9,8 +9,7 @@ export default class Cache {
     provider = new FileProvider({
       folder: '/tmp'
     }),
-    string,
-    krtekOptions = {}
+    string
   } = {}) {
     /**
      * Caching provider. It must have set() and get() method.
@@ -23,50 +22,42 @@ export default class Cache {
     this.string = string;
 
     if (!this.string) {
-      throw new CacheStringMissingError(
+      throw new CacheError(
         'Please specify a string that you want to cache.'
       );
     }
 
     /**
-     * Options that have been passed to krtek and that are relevant for generation of unique hash.
-     */
-    this.krtekOptions = krtekOptions;
-
-    /**
-     * Unique cache string that is generated based on string and options passed to krtek.
-     */
-    this.cacheString = `
-      ${JSON.stringify(this.krtekOptions)}
-      ${this.string}
-    `;
-    this.cacheString = this.cacheString.replace(/\s/g, '');
-
-    /**
      * Cache hash used for cache invalidation.
      */
-    this.cacheHash = this.generateHash(this.cacheString);
+    this.cacheHash = this.generateHash(this.string);
   }
 
   /**
    * Set cache.
    */
-  set(callback) {
-    return this.provider.set(
-      this.cacheHash,
-      this.string,
-      callback
-    );
+  set() {
+    try {
+      return this.provider.set(
+        this.cacheHash,
+        this.string
+      );
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   /*
    * Get cache.
    */
-  get(callback) {
-    return this.provider.get(
-      this.cacheHash,
-      callback
-    );
+  get() {
+    try {
+      return this.provider.get(
+        this.cacheHash
+      );
+    } catch (err) {
+      return Promise.reject(err);
+    }
   }
 
   /*
