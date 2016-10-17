@@ -10,7 +10,7 @@ export default class Krtek extends Hooks {
     cache = true,
     minify = true,
     cacheFolder = '/tmp',
-    contentType = 'text/plain',
+    contentType = 'application/javascript',
     origin = 'localhost',
     host = process.env.HOST || 'localhost',
     port = process.env.PORT || 3000
@@ -29,17 +29,9 @@ export default class Krtek extends Hooks {
   }
 
   configureMiddleware() {
-    this.triggerSync('configure-middleware');
-
     this.app.use(express.static(
       path.resolve(__dirname, '..', 'public')
     ));
-
-    this.triggerSync('configure-middleware-done');
-  }
-
-  configureEndpoints() {
-    this.triggerSync('configure-endpoints');
 
     this.app.get('/bundle', (req, res) => {
       this.triggerSync('route-bundle', req, res);
@@ -47,13 +39,13 @@ export default class Krtek extends Hooks {
       this.bundle(req, res);
     });
 
+    this.trigger('configure-middleware');
+
     this.app.get('*', (req, res) => {
       this.triggerSync('route-root', req, res);
 
       res.sendFile(path.resolve(__dirname, '..', 'index.html'));
     });
-
-    this.triggerSync('configure-endpoints-done');
   }
 
   configureJs(req, res) {
@@ -159,7 +151,6 @@ export default class Krtek extends Hooks {
 
   start() {
     this.configureMiddleware();
-    this.configureEndpoints();
 
     this.app.listen(this.port, this.host, () => {
       this.triggerSync('start');
