@@ -33,21 +33,3 @@ test('initializes babelOptions to given one', (t) => {
     }
   );
 });
-
-test('initializes folder', (t) => {
-  t.is(
-    t.context.bundlerInstance.folder,
-    '/tmp'
-  );
-});
-
-test('initializes folder to given one', (t) => {
-  const bundler = new Bundler({
-    folder: '/opt'
-  });
-
-  t.deepEqual(
-    bundler.folder,
-    '/opt'
-  );
-});

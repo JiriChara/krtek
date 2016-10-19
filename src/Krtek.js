@@ -8,10 +8,7 @@ import Cache from './Cache';
 import FileProvider from './cache/FileProvider';
 
 import {
-  BundleError,
-  CacheError,
-  NoJSCodeGivenError,
-  MinifyError
+  NoJSCodeGivenError
 } from './errors';
 
 export default class Krtek extends Hooks {
@@ -76,28 +73,19 @@ export default class Krtek extends Hooks {
     const cacheProvider = this.createCacheProvider(code);
 
     return cacheProvider.set(code)
-      .then(() => cacheProvider.get(code))
-      .catch((err) => {
-        throw new CacheError(err);
-      });
+      .then(() => cacheProvider.get(code));
   }
 
   handleBundle(code) {
     if (!this.bundler) return Promise.resolve(code);
 
-    return this.bundler.bundle(code)
-      .catch((err) => {
-        throw new BundleError(err);
-      });
+    return this.bundler.bundle(code);
   }
 
   handleMinify(code) {
     if (!this.minifier) return Promise.resolve(code);
 
-    return this.minifier.minify(code)
-      .catch((err) => {
-        throw new MinifyError(err);
-      });
+    return this.minifier.minify(code);
   }
 
   bundle(req, res) {

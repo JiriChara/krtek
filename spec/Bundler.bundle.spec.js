@@ -21,16 +21,14 @@ test('returns bundled javascript', async (t) => {
 test.cb('returns error if bundle fails', (t) => {
   t.plan(1);
 
-  const bundler = new Bundler({
-    folder: '/some/nonexisting/folder/'
-  });
+  const bundler = new Bundler();
 
   bundler.bundle(
-    'console.log(\'foo\');'
+    'invalid js code'
   ).catch((err) => {
     t.regex(
       err.message,
-      /ENOENT: no such file or directory/
+      /Unexpected token/
     );
     t.end();
   });
