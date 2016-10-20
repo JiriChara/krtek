@@ -36,8 +36,13 @@ krtek.on('bundle', (req) => {
   `);
 });
 
-krtek.on('done', (k, req, res, err, data) => {
+krtek.on('done', (req, res, data) => {
   res.write(data);
+  res.end();
+});
+
+krtek.on('error', (req, res, error) => {
+  res.write(error);
   res.end();
 });
 
