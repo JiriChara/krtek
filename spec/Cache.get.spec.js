@@ -16,7 +16,7 @@ test.beforeEach((t) => {
 test.cb('retrieves file from cache', (t) => {
   t.plan(1);
 
-  t.context.cache.set().then(() => {
+  t.context.cache.set(t.context.string).then(() => {
     t.context.cache.get().then((string) => {
       t.is(string, t.context.string);
       t.end();

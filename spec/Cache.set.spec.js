@@ -16,7 +16,7 @@ test.beforeEach((t) => {
 test.cb('caches file', (t) => {
   t.plan(1);
 
-  t.context.cache.set().then(() => {
+  t.context.cache.set(t.context.string).then(() => {
     t.context.cache.get().then((string) => {
       t.is(string, t.context.string);
       t.end();
@@ -34,7 +34,7 @@ test.cb('returns an error if caching provider fails', (t) => {
     })
   });
 
-  cache.set().catch((err) => {
+  cache.set(t.context.string).catch((err) => {
     t.regex(
       err.message,
       /ENOENT: no such file or directory/
@@ -51,7 +51,7 @@ test.cb('returns an error if caching fails', (t) => {
     provider: sinon.spy()
   });
 
-  cache.set().catch((err) => {
+  cache.set(t.context.string).catch((err) => {
     t.regex(
       err.message,
       /this\.provider\.set is not a function/

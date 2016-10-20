@@ -36,11 +36,11 @@ export default class Cache {
   /**
    * Set cache.
    */
-  set() {
+  set(code) {
     try {
       return this.provider.set(
         this.cacheHash,
-        this.string
+        code
       );
     } catch (err) {
       return Promise.reject(err);
