@@ -155,7 +155,7 @@ export default class Krtek extends Hooks {
     this.configureMiddleware();
 
     this.app.listen(this.port, this.host, () => {
-      this.triggerSync('start');
+      this.trigger('start');
     });
   }
 }
