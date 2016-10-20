@@ -8,7 +8,8 @@ import Cache from './Cache';
 import FileProvider from './cache/FileProvider';
 
 import {
-  NoJSCodeGivenError
+  NoJSCodeGivenError,
+  CacheError
 } from './errors';
 
 export default class Krtek extends Hooks {
@@ -87,7 +88,13 @@ export default class Krtek extends Hooks {
       return cacheProvider.get();
     }
 
-    return Promise.resolve(code);
+    try {
+      throw new CacheError(
+        'Cannot retrieve object from cache. Cache options are not given.'
+      );
+    } catch (e) {
+      return Promise.reject(e);
+    }
   }
 
   handleBundle(code) {
@@ -121,14 +128,19 @@ export default class Krtek extends Hooks {
       );
     }
 
-    return this.handleGetCache(code).then(
-      cacheResult => this.handleDone(req, res, cacheResult),
-      (() =>
-          this.handleBundle(code)
-            .then(this.handleMinify)
-          .then(result => this.handleSetCache(code, result))
-      )
-    );
+    const getCachePromise = this.handleGetCache(code);
+
+    getCachePromise
+      .then(cacheResult => this.handleDone(req, res, cacheResult))
+      .catch(() => {
+        const bundlePromise = this.handleBundle(code);
+        const minifyPromise = bundlePromise.then(result => this.handleMinify(result));
+        const setCachePromise = minifyPromise.then(result => this.handleSetCache(code, result));
+
+        setCachePromise
+          .then(result => this.handleDone(req, res, result))
+          .catch(err => this.handleError(req, res, err));
+      });
   }
 
   triggerSync(name, ...args) {

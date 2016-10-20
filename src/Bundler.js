@@ -9,10 +9,6 @@ export default class Bundler {
     this.babelOptions = babelOptions;
   }
 
-  generateRandomHash() {
-    return Math.random().toString(36).slice(2);
-  }
-
   bundle(jsString) {
     return new Promise((resolve, reject) =>
       browserify(jsString)
