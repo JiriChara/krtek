@@ -5,6 +5,7 @@ import sinon from 'sinon';
 
 import Krtek from '../src/Krtek';
 import Cache from '../src/Cache';
+import FileProvider from '../src/cache/FileProvider';
 
 test.beforeEach((t) => {
   t.context.krtekInstance = new Krtek();
@@ -144,6 +145,23 @@ test.cb('it does all the things sequentially', (t) => {
       t.is(cacheResult, result);
       t.end();
     });
+  });
+
+  t.context.krtekInstance.bundle(t.context.req, t.context.res);
+});
+
+test.cb('returns error if something fails', (t) => {
+  t.plan(1);
+
+  t.context.krtekInstance.cacheOptions = {
+    provider: new FileProvider({
+      folder: '/non/existing/folder'
+    })
+  };
+
+  t.context.krtekInstance.on('error', (req, res, err) => {
+    t.regex(err.message, /ENOENT: no such file or directory/);
+    t.end();
   });
 
   t.context.krtekInstance.bundle(t.context.req, t.context.res);
