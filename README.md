@@ -1,4 +1,7 @@
 [![Build Status](https://travis-ci.org/JiriChara/krtek.svg?branch=master)](https://travis-ci.org/JiriChara/krtek)
+[![Code Climate](https://codeclimate.com/github/JiriChara/krtek/badges/gpa.svg)](https://codeclimate.com/github/JiriChara/krtek)
+[![Test Coverage](https://codeclimate.com/github/JiriChara/krtek/badges/coverage.svg)](https://codeclimate.com/github/JiriChara/krtek/coverage)
+[![Issue Count](https://codeclimate.com/github/JiriChara/krtek/badges/issue_count.svg)](https://codeclimate.com/github/JiriChara/krtek)
 
 # krtek
 
