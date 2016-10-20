@@ -122,7 +122,7 @@ export default class Krtek extends Hooks {
     }
 
     return this.handleGetCache(code).then(
-      cacheResult => this.handleDone(cacheResult),
+      cacheResult => this.handleDone(req, res, cacheResult),
       (() =>
           this.handleBundle(code)
             .then(this.handleMinify)
