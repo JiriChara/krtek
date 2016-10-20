@@ -8,6 +8,20 @@ Krtek is a simple node server that allows you to bundle and minify JavaScript on
 
 :warning: **WARNING** Krtek can be evil :japanese_goblin:, because `eval()` is evil. Krtek doesn't use `eval()`, but it accepts JavaScript code as a string, so it can possibly open a gate to your server for hackers! In order to reduce the risk of being hacked make sure all code that is coming from unknown source is executed in the sandbox (you can use for example: [vm.runInContext](https://nodejs.org/api/vm.html#vm_script_runincontext_contextifiedsandbox_options) or [sandbox](https://github.com/gf3/sandbox)). It's also good idea to encrypt the JavaScript code in the browser and decrypt it on krtek server (see. [CryptoJS](https://github.com/brix/crypto-js)) using some secret key. Just make sure that you have a really good reason before you start using Krtek and also be aware of security risks!
 
+## Instalation
+
+### Yarn
+
+```
+yarn add krtek
+```
+
+### npm
+
+```
+npm i krtek -S
+```
+
 ## Usage
 
 ```javascript
