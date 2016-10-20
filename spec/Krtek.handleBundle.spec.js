@@ -6,7 +6,7 @@ import Krtek from '../src/Krtek';
 
 test.beforeEach((t) => {
   t.context.krtekInstance = new Krtek();
-  t.context.code = 'require(\'../src/Krtek\')';
+  t.context.code = 'import Krtek from \'../src/Krtek\'';
 });
 
 test('returns browserified code', async (t) => {

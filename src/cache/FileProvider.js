@@ -28,10 +28,10 @@ export default class FileProvider {
   /**
    * Cache given string in a file and call callback function when done.
    */
-  set(hash, string) {
+  set(hash, code) {
     const file = this.getFilePath(hash);
 
-    return writeFile(file, string);
+    return writeFile(file, code);
   }
 
   /**

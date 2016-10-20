@@ -69,11 +69,25 @@ export default class Krtek extends Hooks {
     );
   }
 
-  handleCache(code) {
-    const cacheProvider = this.createCacheProvider(code);
+  handleSetCache(originalCode, code) {
+    if (this.cacheOptions) {
+      const cacheProvider = this.createCacheProvider(originalCode);
 
-    return cacheProvider.set(code)
-      .then(() => cacheProvider.get(code));
+      return cacheProvider.set(code)
+        .then(() => this.handleGetCache(originalCode));
+    }
+
+    return Promise.resolve(code);
+  }
+
+  handleGetCache(code) {
+    if (this.cacheOptions) {
+      const cacheProvider = this.createCacheProvider(code);
+
+      return cacheProvider.get();
+    }
+
+    return Promise.resolve(code);
   }
 
   handleBundle(code) {
@@ -88,11 +102,18 @@ export default class Krtek extends Hooks {
     return this.minifier.minify(code);
   }
 
+  handleDone(req, res, result) {
+    this.trigger('done', req, res, result);
+  }
+
+  handleError(req, res, err) {
+    this.trigger('error', req, res, err);
+  }
+
   bundle(req, res) {
     this.triggerSync('bundle', req, res);
 
     const code = this.getJsCode();
-    let cacheProvider = null;
 
     if (!code) {
       throw new NoJSCodeGivenError(
@@ -100,17 +121,14 @@ export default class Krtek extends Hooks {
       );
     }
 
-    if (this.cacheOptions) {
-      cacheProvider = this.createCacheProvider(code);
-
-      return cacheProvider.get(code)
-        .catch(() => this.handleBundle(code)
-          .then(this.handleMinify)
-          .then(this.handleCache)
-        );
-    }
-
-    return this.handleBundle(code).then(this.handleMinify);
+    return this.handleGetCache(code).then(
+      cacheResult => this.handleDone(cacheResult),
+      (() =>
+          this.handleBundle(code)
+            .then(this.handleMinify)
+          .then(result => this.handleSetCache(code, result))
+      )
+    );
   }
 
   triggerSync(name, ...args) {
