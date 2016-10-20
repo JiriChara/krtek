@@ -4,3 +4,5 @@ dist
 .__browserify_string_empty.js
 .nyc_output
 npm-debug.log
+esdoc
+coverage
